@@ -20,14 +20,16 @@ namespace TheShop
             Supplier3 = new Supplier3();
         }
 
-        public void SellArticle(int id, int buyerId, Article article)
+        public ServiceMethodResult<bool> SellArticle(Article article, int buyerId)
         {
-            if (article == null)
-            {
-                throw new Exception("Could not order article");
-            }
+	        if (article == null)
+	        {
+		        const string message = "SellArticle: Article not provided.";
+                   logger.Debug(message);
+		        return new ServiceMethodResult<bool>(false, true, message);
+	        }
 
-            logger.Debug("Trying to sell article with id=" + id);
+	        logger.Debug("SellArticle: Trying to sell article with id=" + article.ID);
 
             article.IsSold = true;
             article.SoldDate = DateTime.Now;
@@ -36,15 +38,14 @@ namespace TheShop
             try
             {
                 DatabaseDriver.Save(article);
-                logger.Info("Article with id=" + id + " is sold.");
+                logger.Info("SellArticle: Article with id=" + article.ID + " is sold.");
+                return new ServiceMethodResult<bool>(true, false);
             }
-            catch (ArgumentNullException ex)
+            catch (Exception e)
             {
-                logger.Error("Could not save article with id=" + id);
-                throw new Exception("Could not save article with id");
-            }
-            catch (Exception)
-            {
+	            var message = "SellArticle: Could not save article with id=" + article.ID;
+                logger.Error(message, e);
+                return new ServiceMethodResult<bool>(false, true, message);
             }
         }
 
@@ -79,6 +80,11 @@ namespace TheShop
             }
 
             article = tempArticle;
+
+            if (article == null)
+            {
+	            throw new Exception("Could not order article");
+            }
 
             return article;
         }

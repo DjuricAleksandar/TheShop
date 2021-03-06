@@ -14,8 +14,12 @@ namespace TheShop
 				var article = shopService.OrderArticle(1, 20);
 				if(article == null)
 					Console.WriteLine("Article not found.");
-				else 
-					shopService.SellArticle(1, 10, article);
+				else
+				{
+					var result = shopService.SellArticle(article, 10);
+					if(result.IsError)
+						Console.WriteLine(result.Message);
+				}
 			}
 			catch (Exception ex)
 			{

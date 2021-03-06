@@ -9,9 +9,9 @@ namespace TheShop
             Console.WriteLine("Info: " + message);
         }
 
-        public void Error(string message)
+        public void Error(string message, Exception exception = null)
         {
-            Console.WriteLine("Error: " + message);
+            Console.WriteLine("Error: " + message + (exception != null ? " - " + exception.ToString() : ""));
         }
 
         public void Debug(string message)
