@@ -11,7 +11,11 @@ namespace TheShop
 			try
 			{
 				//order and sell
-				shopService.OrderAndSellArticle(1, 20, 10);
+				var article = shopService.OrderArticle(1, 20);
+				if(article == null)
+					Console.WriteLine("Article not found.");
+				else 
+					shopService.SellArticle(1, 10, article);
 			}
 			catch (Exception ex)
 			{

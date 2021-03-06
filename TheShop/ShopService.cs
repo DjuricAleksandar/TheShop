@@ -20,10 +20,36 @@ namespace TheShop
             Supplier3 = new Supplier3();
         }
 
-        public void OrderAndSellArticle(int id, int maxExpectedPrice, int buyerId)
+        public void SellArticle(int id, int buyerId, Article article)
         {
-            #region ordering article
+            if (article == null)
+            {
+                throw new Exception("Could not order article");
+            }
 
+            logger.Debug("Trying to sell article with id=" + id);
+
+            article.IsSold = true;
+            article.SoldDate = DateTime.Now;
+            article.BuyerUserId = buyerId;
+
+            try
+            {
+                DatabaseDriver.Save(article);
+                logger.Info("Article with id=" + id + " is sold.");
+            }
+            catch (ArgumentNullException ex)
+            {
+                logger.Error("Could not save article with id=" + id);
+                throw new Exception("Could not save article with id");
+            }
+            catch (Exception)
+            {
+            }
+        }
+
+        public Article OrderArticle(int id, int maxExpectedPrice)
+        {
             Article article = null;
             Article tempArticle = null;
             var articleExists = Supplier1.ArticleInInventory(id);
@@ -54,36 +80,7 @@ namespace TheShop
 
             article = tempArticle;
 
-            #endregion ordering article
-
-            #region selling article
-
-            if (article == null)
-            {
-                throw new Exception("Could not order article");
-            }
-
-            logger.Debug("Trying to sell article with id=" + id);
-
-            article.IsSold = true;
-            article.SoldDate = DateTime.Now;
-            article.BuyerUserId = buyerId;
-
-            try
-            {
-                DatabaseDriver.Save(article);
-                logger.Info("Article with id=" + id + " is sold.");
-            }
-            catch (ArgumentNullException ex)
-            {
-                logger.Error("Could not save article with id=" + id);
-                throw new Exception("Could not save article with id");
-            }
-            catch (Exception)
-            {
-            }
-
-            #endregion selling article
+            return article;
         }
 
         public Article GetById(int id)
