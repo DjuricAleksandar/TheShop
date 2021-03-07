@@ -6,16 +6,21 @@
 	/// <typeparam name="T">Type of method result.</typeparam>
 	public class ServiceMethodResult<T>
 	{
-		public T Result { get; }
-		public bool IsError { get; }
-		public string Message { get; }
-
 		private ServiceMethodResult(T result, bool isError, string message = "")
 		{
 			Result = result;
 			IsError = isError;
 			Message = message;
 		}
+
+		/// <summary>
+		/// Method completed successfully.
+		/// </summary>
+		public static ServiceMethodResult<bool> True => new ServiceMethodResult<bool>(true, false);
+
+		public bool IsError { get; }
+		public string Message { get; }
+		public T Result { get; }
 
 		/// <summary>
 		/// Return error message and set isError flag to true.
@@ -36,10 +41,5 @@
 		{
 			return new ServiceMethodResult<T>(result, false);
 		}
-
-		/// <summary>
-		/// Method completed successfully.
-		/// </summary>
-		public static ServiceMethodResult<bool> True => new ServiceMethodResult<bool>(true, false);
 	}
 }

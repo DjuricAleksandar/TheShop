@@ -19,12 +19,12 @@ namespace TheShop
 			{
 				//order and sell
 				var orderResult = shopService.OrderArticle(1, 459);
-				if(orderResult.IsError)
+				if (orderResult.IsError)
 					Console.WriteLine(orderResult.Message);
 				else
 				{
 					var sellResult = shopService.SellArticle(orderResult.Result, 10);
-					if(sellResult.IsError)
+					if (sellResult.IsError)
 						Console.WriteLine(sellResult.Message);
 				}
 			}
@@ -37,7 +37,7 @@ namespace TheShop
 			{
 				//print article on console
 				var articleResult = shopService.GetById(1);
-				if(articleResult.IsError)
+				if (articleResult.IsError)
 					Console.WriteLine(articleResult.Message);
 				else
 					Console.WriteLine("Found article with ID: " + articleResult.Result.Id);
@@ -49,7 +49,7 @@ namespace TheShop
 
 			try
 			{
-				//print article on console				
+				//print article on console
 				var articleResult = shopService.GetById(12);
 				if (articleResult.IsError)
 					Console.WriteLine(articleResult.Message);
