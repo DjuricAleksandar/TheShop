@@ -10,9 +10,9 @@ namespace TheShop
 		{
 			var shopService = new ShopService(new DatabaseDriver(), new Logger(), new List<ISupplier>
 			{
-				new Supplier1(),
-				new Supplier2(),
-				new Supplier3()
+				new Supplier("Article from supplier1", 458),
+				new Supplier("Article from supplier2", 459),
+				new Supplier("Article from supplier3", 460)
 			}.ToImmutableList());
 
 			try
