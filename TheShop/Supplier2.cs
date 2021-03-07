@@ -11,9 +11,9 @@
         {
             return new Article()
             {
-                ID = 1,
-                Name_of_article = "Article from supplier2",
-                ArticlePrice = 459
+                Id = 1,
+                Name = "Article from supplier2",
+                Price = 459
             };
         }
     }

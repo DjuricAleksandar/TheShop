@@ -61,7 +61,7 @@ namespace TheShop
 					if (!supplier.ArticleInInventory(id)) continue;
 
 					var article = supplier.GetArticle(id);
-					if (!(article?.ArticlePrice <= maxExpectedPrice)) continue;
+					if (!(article?.Price <= maxExpectedPrice)) continue;
 
 					_logger.Debug(string.Format(Messages.OrderArticleReceived, id));
 					return ServiceMethodResult<Article>.Ok(article);
@@ -91,7 +91,7 @@ namespace TheShop
 				return ServiceMethodResult<bool>.Error(Messages.SellArticleArticleNull);
 			}
 
-			_logger.Debug(string.Format(Messages.SellArticleTryingToSell, article.ID));
+			_logger.Debug(string.Format(Messages.SellArticleTryingToSell, article.Id));
 
 			article.IsSold = true;
 			article.SoldDate = DateTime.Now;
@@ -100,12 +100,12 @@ namespace TheShop
 			try
 			{
 				_databaseDriver.Save(article);
-				_logger.Info(string.Format(Messages.SellArticleSold, article.ID));
+				_logger.Info(string.Format(Messages.SellArticleSold, article.Id));
 				return ServiceMethodResult<bool>.True;
 			}
 			catch (Exception e)
 			{
-				var message = string.Format(Messages.SellArticleException, article.ID);
+				var message = string.Format(Messages.SellArticleException, article.Id);
 				_logger.Error(message, e);
 				return ServiceMethodResult<bool>.Error(message);
 			}

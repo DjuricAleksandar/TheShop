@@ -40,7 +40,7 @@ namespace TheShop
 				if(articleResult.IsError)
 					Console.WriteLine(articleResult.Message);
 				else
-					Console.WriteLine("Found article with ID: " + articleResult.Result.ID);
+					Console.WriteLine("Found article with ID: " + articleResult.Result.Id);
 			}
 			catch (Exception ex)
 			{
@@ -54,7 +54,7 @@ namespace TheShop
 				if (articleResult.IsError)
 					Console.WriteLine(articleResult.Message);
 				else
-					Console.WriteLine("Found article with ID: " + articleResult.Result.ID);
+					Console.WriteLine("Found article with ID: " + articleResult.Result.Id);
 			}
 			catch (Exception ex)
 			{
