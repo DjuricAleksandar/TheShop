@@ -18,7 +18,7 @@ namespace TheShop
 			try
 			{
 				//order and sell
-				var orderResult = shopService.OrderArticle(1, 20);
+				var orderResult = shopService.OrderArticle(1, 459);
 				if(orderResult.IsError)
 					Console.WriteLine(orderResult.Message);
 				else
