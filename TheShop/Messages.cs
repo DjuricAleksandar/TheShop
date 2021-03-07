@@ -17,5 +17,8 @@
 			"OrderArticle: Supplier error for article id={0} with max price={1}.";
 
 		internal const string OrderArticleReceived = "OrderArticle: Article id={0} received.";
+
+		internal const string GetByIdReceived = "GetById: Article id={0} received.";
+		internal const string GetByIdException = "GetById: Could not get Article id={0}.";
 	}
 }

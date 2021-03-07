@@ -103,9 +103,20 @@ namespace TheShop
 			return ServiceMethodResult<Article>.Error(message);
 		}
 
-		public Article GetById(int id)
+		public ServiceMethodResult<Article> GetById(int id)
 		{
-			return DatabaseDriver.GetById(id);
+			try
+			{
+				var article = DatabaseDriver.GetById(id);
+				logger.Debug(string.Format(Messages.GetByIdReceived, id));
+				return ServiceMethodResult<Article>.Ok(article);
+			}
+			catch (Exception e)
+			{
+				var message = string.Format(Messages.GetByIdException, id);
+				logger.Error(message, e);
+				return ServiceMethodResult<Article>.Error(message);
+			}
 		}
 	}
 }
