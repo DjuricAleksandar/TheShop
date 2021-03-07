@@ -11,14 +11,14 @@ namespace TheShop
 			try
 			{
 				//order and sell
-				var article = shopService.OrderArticle(1, 20);
-				if(article == null)
-					Console.WriteLine("Article not found.");
+				var orderResult = shopService.OrderArticle(1, 20);
+				if(orderResult.IsError)
+					Console.WriteLine(orderResult.Message);
 				else
 				{
-					var result = shopService.SellArticle(article, 10);
-					if(result.IsError)
-						Console.WriteLine(result.Message);
+					var sellResult = shopService.SellArticle(orderResult.Result, 10);
+					if(sellResult.IsError)
+						Console.WriteLine(sellResult.Message);
 				}
 			}
 			catch (Exception ex)

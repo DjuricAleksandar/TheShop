@@ -45,6 +45,7 @@
     <Compile Include="Article.cs" />
     <Compile Include="DatabaseDriver.cs" />
     <Compile Include="Logger.cs" />
+    <Compile Include="Messages.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ShopService.cs" />
