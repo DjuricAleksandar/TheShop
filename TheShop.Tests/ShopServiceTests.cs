@@ -1,16 +1,19 @@
+using Moq;
+using Moq.AutoMock;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using Moq;
-using Moq.AutoMock;
 using Xunit;
 
 namespace TheShop.Tests
 {
 	public class ShopServiceTests
 	{
-		private readonly ShopService _shop;
+		private const int HighestPrice = 300;
+		private const int LowestPrice = 100;
+		private const int MiddlePrice = 200;
 		private const int ThrowException = -5;
+		private readonly ShopService _shop;
 
 		public ShopServiceTests()
 		{
@@ -19,7 +22,7 @@ namespace TheShop.Tests
 			var databaseDriverMock = mocker.GetMock<IDatabaseDriver>();
 			databaseDriverMock
 				.Setup(dd => dd.GetById(It.Is<int>(id => id > 0)))
-				.Returns((int id) => new Article {ID = id});
+				.Returns((int id) => new Article { ID = id });
 			databaseDriverMock
 				.Setup(dd => dd.GetById(ThrowException))
 				.Throws(new Exception());
@@ -30,26 +33,14 @@ namespace TheShop.Tests
 
 			var logger = mocker.GetMock<ILogger>().Object;
 
-			var supplier1 = mocker.GetMock<ISupplier>().Object;
-			var supplier2 = mocker.GetMock<ISupplier>().Object;
-			var supplier3 = mocker.GetMock<ISupplier>().Object;
 			var suppliers = new List<ISupplier>
 			{
-				supplier1,
-				supplier2,
-				supplier3
+				GetMockedSupplier(HighestPrice),
+				GetMockedSupplier(MiddlePrice),
+				GetMockedSupplier(LowestPrice)
 			}.ToImmutableList();
 
 			_shop = new ShopService(databaseDriver, logger, suppliers);
-		}
-
-		[Fact]
-		public void GetByIdNegativeValueReturnsErrorMessage()
-		{
-			const int id = -1;
-			var result = _shop.GetById(id);
-			Assert.True(result.IsError);
-			Assert.Equal(string.Format(Messages.GetByIdNull, id), result.Message);
 		}
 
 		[Fact]
@@ -74,6 +65,27 @@ namespace TheShop.Tests
 		}
 
 		[Fact]
+		public void GetByIdNegativeValueReturnsErrorMessage()
+		{
+			const int id = -1;
+			var result = _shop.GetById(id);
+			Assert.True(result.IsError);
+			Assert.Equal(string.Format(Messages.GetByIdNull, id), result.Message);
+		}
+
+		[Theory]
+		[InlineData(LowestPrice - 1)]
+		[InlineData(MiddlePrice - 1)]
+		[InlineData(HighestPrice - 1)]
+		public void OrderArticleExistingIdReturnsArticle(int maxExpectedPrice)
+		{
+			var result = _shop.OrderArticle(1, maxExpectedPrice);
+			Assert.False(result.IsError);
+			Assert.Empty(result.Message);
+			Assert.Equal(1, result.Result.ID);
+		}
+
+		[Fact]
 		public void OrderArticleNegativeValueReturnsErrorMessage()
 		{
 			const int id = -1;
@@ -83,16 +95,30 @@ namespace TheShop.Tests
 			Assert.Equal(string.Format(Messages.OrderArticleNotFound, id, maxValue), result.Message);
 		}
 
-		[Theory]
-		[InlineData(1)]
-		[InlineData(2)]
-		public void OrderArticleExistingIdReturnsArticle(int id)
+		[Fact]
+		public void OrderArticleSupplierThrowsExceptionReturnsErrorMessage()
 		{
 			const int maxValue = int.MaxValue;
-			var result = _shop.OrderArticle(id, maxValue);
+			var result = _shop.OrderArticle(ThrowException, maxValue);
+			Assert.True(result.IsError);
+			Assert.Equal(string.Format(Messages.OrderArticleSupplierError, ThrowException, maxValue), result.Message);
+		}
+
+		[Fact]
+		public void SellArticleCorrectArticleReturnsTrue()
+		{
+			var result = _shop.SellArticle(new Article() { ID = 5 }, 1);
 			Assert.False(result.IsError);
 			Assert.Empty(result.Message);
-			Assert.Equal(id, result.Result.ID);
+			Assert.True(result.Result);
+		}
+
+		[Fact]
+		public void SellArticleDatabaseThrowsExceptionReturnsErrorMessage()
+		{
+			var result = _shop.SellArticle(new Article { ID = ThrowException }, 1);
+			Assert.True(result.IsError);
+			Assert.Equal(string.Format(Messages.SellArticleException, ThrowException), result.Message);
 		}
 
 		[Fact]
@@ -103,21 +129,20 @@ namespace TheShop.Tests
 			Assert.Equal(Messages.SellArticleArticleNull, result.Message);
 		}
 
-		[Fact]
-		public void SellArticleDatabaseThrowsExceptionReturnsErrorMessage()
+		private static ISupplier GetMockedSupplier(int articlePrice)
 		{
-			var result = _shop.SellArticle(new Article {ID = ThrowException}, 1);
-			Assert.True(result.IsError);
-			Assert.Equal(string.Format(Messages.SellArticleException, ThrowException), result.Message);
-		}
-
-		[Fact]
-		public void SellArticleCorrectArticleReturnsTrue()
-		{
-			var result = _shop.SellArticle(new Article() { ID = 5 }, 1);
-			Assert.False(result.IsError);
-			Assert.Empty(result.Message);
-			Assert.True(result.Result);
+			var mocker = new AutoMocker();
+			var supplierMock = mocker.GetMock<ISupplier>();
+			supplierMock
+				.Setup(s => s.ArticleInInventory(It.Is<int>(id => id > 0)))
+				.Returns(true);
+			supplierMock
+				.Setup(s => s.GetArticle(It.Is<int>(id => id > 0)))
+				.Returns((int id) => new Article { ID = id, ArticlePrice = articlePrice });
+			supplierMock
+				.Setup(dd => dd.ArticleInInventory(It.Is<int>(id => id == ThrowException)))
+				.Throws(new Exception());
+			return supplierMock.Object;
 		}
 	}
 }
