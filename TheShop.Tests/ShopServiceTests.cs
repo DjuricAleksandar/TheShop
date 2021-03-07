@@ -74,17 +74,24 @@ namespace TheShop.Tests
 		}
 
 		[Theory]
-		[InlineData(LowestPrice - 1)]
 		[InlineData(LowestPrice)]
 		[InlineData(MiddlePrice)]
 		[InlineData(HighestPrice)]
-		public void OrderArticleExistingIdReturnsArticle(int maxExpectedPrice)
+		public void OrderArticleArticleExistsAndGoodPriceReturnsArticle(int maxExpectedPrice)
 		{
 			var result = _shop.OrderArticle(1, maxExpectedPrice);
-			Assert.False(result.IsError);
+			Assert.False(result.IsError, "Expected no error.");
 			Assert.Empty(result.Message);
 			Assert.Equal(1, result.Result.ID);
 			Assert.True(result.Result.ArticlePrice <= maxExpectedPrice);
+		}
+		
+		[Fact]
+		public void OrderArticleTooLowPriceReturnsError()
+		{
+			var result = _shop.OrderArticle(1, LowestPrice - 1);
+			Assert.True(result.IsError, "Expected error result.");
+			Assert.Equal(string.Format(Messages.OrderArticleNotFound, 1, LowestPrice - 1), result.Message);
 		}
 
 		[Fact]
@@ -93,7 +100,7 @@ namespace TheShop.Tests
 			const int id = -1;
 			const int maxValue = int.MaxValue;
 			var result = _shop.OrderArticle(id, maxValue);
-			Assert.True(result.IsError);
+			Assert.True(result.IsError, "Expected error result.");
 			Assert.Equal(string.Format(Messages.OrderArticleNotFound, id, maxValue), result.Message);
 		}
 
@@ -102,7 +109,7 @@ namespace TheShop.Tests
 		{
 			const int maxValue = int.MaxValue;
 			var result = _shop.OrderArticle(ThrowException, maxValue);
-			Assert.True(result.IsError);
+			Assert.True(result.IsError, "Expected error result.");
 			Assert.Equal(string.Format(Messages.OrderArticleNotFound, ThrowException, maxValue), result.Message);
 		}
 
@@ -110,16 +117,16 @@ namespace TheShop.Tests
 		public void SellArticleCorrectArticleReturnsTrue()
 		{
 			var result = _shop.SellArticle(new Article() { ID = 5 }, 1);
-			Assert.False(result.IsError);
+			Assert.False(result.IsError, "Expected no error");
 			Assert.Empty(result.Message);
-			Assert.True(result.Result);
+			Assert.True(result.Result, "Expected true result");
 		}
 
 		[Fact]
 		public void SellArticleDatabaseThrowsExceptionReturnsErrorMessage()
 		{
 			var result = _shop.SellArticle(new Article { ID = ThrowException }, 1);
-			Assert.True(result.IsError);
+			Assert.True(result.IsError, "Expected error result.");
 			Assert.Equal(string.Format(Messages.SellArticleException, ThrowException), result.Message);
 		}
 
@@ -127,7 +134,7 @@ namespace TheShop.Tests
 		public void SellArticleNullValueReturnsErrorMessage()
 		{
 			var result = _shop.SellArticle(null, 1);
-			Assert.True(result.IsError);
+			Assert.True(result.IsError, "Expected error result.");
 			Assert.Equal(Messages.SellArticleArticleNull, result.Message);
 		}
 
