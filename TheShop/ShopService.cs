@@ -105,6 +105,12 @@ namespace TheShop
 			try
 			{
 				var article = _databaseDriver.GetById(id);
+				if (article == null)
+				{
+					var message = string.Format(Messages.GetByIdNull, id);
+					_logger.Debug(message);
+					return ServiceMethodResult<Article>.Error(message);
+				}
 				_logger.Debug(string.Format(Messages.GetByIdReceived, id));
 				return ServiceMethodResult<Article>.Ok(article);
 			}

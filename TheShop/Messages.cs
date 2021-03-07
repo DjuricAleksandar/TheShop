@@ -20,5 +20,6 @@
 
 		internal const string GetByIdReceived = "GetById: Article id={0} received.";
 		internal const string GetByIdException = "GetById: Could not get Article id={0}.";
+		internal const string GetByIdNull = "GetById: Database driver returned null for Article id={0}.";
 	}
 }

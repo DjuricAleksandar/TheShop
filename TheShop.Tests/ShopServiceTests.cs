@@ -1,17 +1,47 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using Moq;
+using Moq.AutoMock;
 using Xunit;
 
 namespace TheShop.Tests
 {
 	public class ShopServiceTests
 	{
-		private readonly ShopService _shop = new ShopService(new DatabaseDriver(), new Logger(), new List<ISupplier>
+		private readonly ShopService _shop;
+		private const int ThrowException = -5;
+
+		public ShopServiceTests()
 		{
-			new Supplier1(),
-			new Supplier2(),
-			new Supplier3()
-		}.ToImmutableList());
+			var mocker = new AutoMocker();
+
+			var databaseDriverMock = mocker.GetMock<IDatabaseDriver>();
+			databaseDriverMock
+				.Setup(dd => dd.GetById(It.Is<int>(id => id > 0)))
+				.Returns((int id) => new Article {ID = id});
+			databaseDriverMock
+				.Setup(dd => dd.GetById(ThrowException))
+				.Throws(new Exception());
+			databaseDriverMock
+				.Setup(dd => dd.Save(It.Is<Article>(a => a.ID == ThrowException)))
+				.Throws(new Exception());
+			var databaseDriver = databaseDriverMock.Object;
+
+			var logger = mocker.GetMock<ILogger>().Object;
+
+			var supplier1 = mocker.GetMock<ISupplier>().Object;
+			var supplier2 = mocker.GetMock<ISupplier>().Object;
+			var supplier3 = mocker.GetMock<ISupplier>().Object;
+			var suppliers = new List<ISupplier>
+			{
+				supplier1,
+				supplier2,
+				supplier3
+			}.ToImmutableList();
+
+			_shop = new ShopService(databaseDriver, logger, suppliers);
+		}
 
 		[Fact]
 		public void GetByIdNegativeValueReturnsErrorMessage()
@@ -19,7 +49,15 @@ namespace TheShop.Tests
 			const int id = -1;
 			var result = _shop.GetById(id);
 			Assert.True(result.IsError);
-			Assert.Equal(string.Format(Messages.GetByIdException, id), result.Message);
+			Assert.Equal(string.Format(Messages.GetByIdNull, id), result.Message);
+		}
+
+		[Fact]
+		public void GetByIdDatabaseThrowsExceptionReturnsErrorMessage()
+		{
+			var result = _shop.GetById(ThrowException);
+			Assert.True(result.IsError);
+			Assert.Equal(string.Format(Messages.GetByIdException, ThrowException), result.Message);
 		}
 
 		[Theory]
@@ -63,6 +101,14 @@ namespace TheShop.Tests
 			var result = _shop.SellArticle(null, 1);
 			Assert.True(result.IsError);
 			Assert.Equal(Messages.SellArticleArticleNull, result.Message);
+		}
+
+		[Fact]
+		public void SellArticleDatabaseThrowsExceptionReturnsErrorMessage()
+		{
+			var result = _shop.SellArticle(new Article {ID = ThrowException}, 1);
+			Assert.True(result.IsError);
+			Assert.Equal(string.Format(Messages.SellArticleException, ThrowException), result.Message);
 		}
 
 		[Fact]
