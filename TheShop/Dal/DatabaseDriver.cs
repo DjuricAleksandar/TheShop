@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using TheShop.Model;
 
-namespace TheShop
+namespace TheShop.Dal
 {
     //in memory implementation
     public class DatabaseDriver : IDatabaseDriver

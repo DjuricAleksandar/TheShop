@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using TheShop.Dal;
+using TheShop.Logging;
+using TheShop.Suppliers;
 
 namespace TheShop
 {

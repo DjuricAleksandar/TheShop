@@ -3,6 +3,10 @@ using Moq.AutoMock;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using TheShop.Dal;
+using TheShop.Logging;
+using TheShop.Model;
+using TheShop.Suppliers;
 using Xunit;
 
 namespace TheShop.Tests

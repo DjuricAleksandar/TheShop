@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TheShop
+namespace TheShop.Logging
 {
 	public class Logger : ILogger
 	{

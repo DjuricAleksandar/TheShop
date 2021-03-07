@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TheShop
+namespace TheShop.Model
 {
 	public class Article
 	{

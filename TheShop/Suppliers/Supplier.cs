@@ -1,4 +1,6 @@
-﻿namespace TheShop
+﻿using TheShop.Model;
+
+namespace TheShop.Suppliers
 {
 	public class Supplier : ISupplier
 	{
