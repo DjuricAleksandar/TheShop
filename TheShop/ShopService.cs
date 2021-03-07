@@ -19,8 +19,8 @@ namespace TheShop
 		/// <summary>
 		/// Get sold article by Id.
 		/// </summary>
-		/// <param name="id"></param>
-		/// <returns></returns>
+		/// <param name="id">Article Id</param>
+		/// <returns>ServiceMethodResult</returns>
 		public ServiceMethodResult<Article> GetById(int id)
 		{
 			try
@@ -43,61 +43,46 @@ namespace TheShop
 			}
 		}
 
+		/// <summary>
+		/// Check if article exists in any of the suppliers storage,
+		/// and returns it if it's price lesser or equal the maxExpectedPrice.
+		/// </summary>
+		/// <param name="id">Article Id</param>
+		/// <param name="maxExpectedPrice">Max allowed article price</param>
+		/// <returns>ServiceMethodResult</returns>
 		public ServiceMethodResult<Article> OrderArticle(int id, int maxExpectedPrice)
 		{
 			_logger.Debug(string.Format(Messages.OrderArticleTryingToOrder, id, maxExpectedPrice));
 
-			Article article;
-			Article tempArticle = null;
-			string message;
-			try
+			foreach (var supplier in _suppliers)
 			{
-				var articleExists = _suppliers[0].ArticleInInventory(id);
-				if (articleExists)
+				try
 				{
-					tempArticle = _suppliers[0].GetArticle(id);
-					if (maxExpectedPrice < tempArticle.ArticlePrice)
-					{
-						articleExists = _suppliers[1].ArticleInInventory(id);
-						if (articleExists)
-						{
-							tempArticle = _suppliers[1].GetArticle(id);
-							if (maxExpectedPrice < tempArticle.ArticlePrice)
-							{
-								articleExists = _suppliers[2].ArticleInInventory(id);
-								if (articleExists)
-								{
-									tempArticle = _suppliers[2].GetArticle(id);
-									if (maxExpectedPrice < tempArticle.ArticlePrice)
-									{
-										article = tempArticle;
-									}
-								}
-							}
-						}
-					}
+					if (!supplier.ArticleInInventory(id)) continue;
+
+					var article = supplier.GetArticle(id);
+					if (!(article?.ArticlePrice <= maxExpectedPrice)) continue;
+
+					_logger.Debug(string.Format(Messages.OrderArticleReceived, id));
+					return ServiceMethodResult<Article>.Ok(article);
 				}
-
-				article = tempArticle;
-			}
-			catch (Exception e)
-			{
-				message = string.Format(Messages.OrderArticleSupplierError, id, maxExpectedPrice);
-				_logger.Error(message, e);
-				return ServiceMethodResult<Article>.Error(message);
+				catch (Exception e)
+				{
+					_logger.Error(string.Format(Messages.OrderArticleSupplierError, id, maxExpectedPrice), e);
+				}
 			}
 
-			if (article != null)
-			{
-				_logger.Debug(string.Format(Messages.OrderArticleReceived, id));
-				return ServiceMethodResult<Article>.Ok(article);
-			}
-
-			message = string.Format(Messages.OrderArticleNotFound, id, maxExpectedPrice);
+			var message = string.Format(Messages.OrderArticleNotFound, id, maxExpectedPrice);
 			_logger.Debug(message);
 			return ServiceMethodResult<Article>.Error(message);
 		}
 
+		/// <summary>
+		/// Sells the article.
+		/// </summary>
+		/// <param name="article">Article to sell.</param>
+		/// <param name="buyerId">Id of the buyer of the article.</param>
+		/// <returns>ServiceMethodResult</returns>
 		public ServiceMethodResult<bool> SellArticle(Article article, int buyerId)
 		{
 			if (article == null)
