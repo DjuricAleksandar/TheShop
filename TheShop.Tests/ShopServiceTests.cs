@@ -1,11 +1,17 @@
-using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using Xunit;
 
 namespace TheShop.Tests
 {
 	public class ShopServiceTests
 	{
-		private readonly ShopService _shop = new ShopService();
+		private readonly ShopService _shop = new ShopService(new DatabaseDriver(), new Logger(), new List<ISupplier>
+		{
+			new Supplier1(),
+			new Supplier2(),
+			new Supplier3()
+		}.ToImmutableList());
 
 		[Fact]
 		public void GetByIdNegativeValueReturnsErrorMessage()
@@ -62,7 +68,7 @@ namespace TheShop.Tests
 		[Fact]
 		public void SellArticleCorrectArticleReturnsTrue()
 		{
-			var result = _shop.SellArticle(new Article() {ID = 5}, 1);
+			var result = _shop.SellArticle(new Article() { ID = 5 }, 1);
 			Assert.False(result.IsError);
 			Assert.Empty(result.Message);
 			Assert.True(result.Result);

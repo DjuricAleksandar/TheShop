@@ -1,12 +1,19 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace TheShop
 {
-	internal class Program
+	internal static class Program
 	{
-		private static void Main(string[] args)
+		private static void Main()
 		{
-			var shopService = new ShopService();
+			var shopService = new ShopService(new DatabaseDriver(), new Logger(), new List<ISupplier>
+			{
+				new Supplier1(),
+				new Supplier2(),
+				new Supplier3()
+			}.ToImmutableList());
 
 			try
 			{

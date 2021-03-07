@@ -1,34 +1,31 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace TheShop
 {
 	public class ShopService
 	{
-		private DatabaseDriver DatabaseDriver;
-		private Logger logger;
+		private readonly IDatabaseDriver _databaseDriver;
+		private readonly ILogger _logger;
+		private readonly IImmutableList<ISupplier> _suppliers;
 
-		private Supplier1 Supplier1;
-		private Supplier2 Supplier2;
-		private Supplier3 Supplier3;
-
-		public ShopService()
+		public ShopService(IDatabaseDriver databaseDriver, ILogger logger, IImmutableList<ISupplier> suppliers)
 		{
-			DatabaseDriver = new DatabaseDriver();
-			logger = new Logger();
-			Supplier1 = new Supplier1();
-			Supplier2 = new Supplier2();
-			Supplier3 = new Supplier3();
+			_databaseDriver = databaseDriver;
+			_logger = logger;
+			_suppliers = suppliers;
 		}
 
 		public ServiceMethodResult<bool> SellArticle(Article article, int buyerId)
 		{
 			if (article == null)
 			{
-				logger.Debug(Messages.SellArticleArticleNull);
+				_logger.Debug(Messages.SellArticleArticleNull);
 				return ServiceMethodResult<bool>.Error(Messages.SellArticleArticleNull);
 			}
 
-			logger.Debug(string.Format(Messages.SellArticleTryingToSell, article.ID));
+			_logger.Debug(string.Format(Messages.SellArticleTryingToSell, article.ID));
 
 			article.IsSold = true;
 			article.SoldDate = DateTime.Now;
@@ -36,43 +33,43 @@ namespace TheShop
 
 			try
 			{
-				DatabaseDriver.Save(article);
-				logger.Info(string.Format(Messages.SellArticleSold, article.ID));
+				_databaseDriver.Save(article);
+				_logger.Info(string.Format(Messages.SellArticleSold, article.ID));
 				return ServiceMethodResult<bool>.True;
 			}
 			catch (Exception e)
 			{
 				var message = string.Format(Messages.SellArticleException, article.ID);
-				logger.Error(message, e);
+				_logger.Error(message, e);
 				return ServiceMethodResult<bool>.Error(message);
 			}
 		}
 
 		public ServiceMethodResult<Article> OrderArticle(int id, int maxExpectedPrice)
 		{
-			logger.Debug(string.Format(Messages.OrderArticleTryingToOrder, id, maxExpectedPrice));
+			_logger.Debug(string.Format(Messages.OrderArticleTryingToOrder, id, maxExpectedPrice));
 
 			Article article;
 			Article tempArticle = null;
 			string message;
 			try
 			{
-				var articleExists = Supplier1.ArticleInInventory(id);
+				var articleExists = _suppliers[0].ArticleInInventory(id);
 				if (articleExists)
 				{
-					tempArticle = Supplier1.GetArticle(id);
+					tempArticle = _suppliers[0].GetArticle(id);
 					if (maxExpectedPrice < tempArticle.ArticlePrice)
 					{
-						articleExists = Supplier2.ArticleInInventory(id);
+						articleExists = _suppliers[1].ArticleInInventory(id);
 						if (articleExists)
 						{
-							tempArticle = Supplier2.GetArticle(id);
+							tempArticle = _suppliers[1].GetArticle(id);
 							if (maxExpectedPrice < tempArticle.ArticlePrice)
 							{
-								articleExists = Supplier3.ArticleInInventory(id);
+								articleExists = _suppliers[2].ArticleInInventory(id);
 								if (articleExists)
 								{
-									tempArticle = Supplier3.GetArticle(id);
+									tempArticle = _suppliers[2].GetArticle(id);
 									if (maxExpectedPrice < tempArticle.ArticlePrice)
 									{
 										article = tempArticle;
@@ -88,18 +85,18 @@ namespace TheShop
 			catch (Exception e)
 			{
 				message = string.Format(Messages.OrderArticleSupplierError, id, maxExpectedPrice);
-				logger.Error(message, e);
+				_logger.Error(message, e);
 				return ServiceMethodResult<Article>.Error(message);
 			}
 
 			if (article != null)
 			{
-				logger.Debug(string.Format(Messages.OrderArticleReceived, id));
+				_logger.Debug(string.Format(Messages.OrderArticleReceived, id));
 				return ServiceMethodResult<Article>.Ok(article);
 			}
 
 			message = string.Format(Messages.OrderArticleNotFound, id, maxExpectedPrice);
-			logger.Debug(message);
+			_logger.Debug(message);
 			return ServiceMethodResult<Article>.Error(message);
 		}
 
@@ -107,14 +104,14 @@ namespace TheShop
 		{
 			try
 			{
-				var article = DatabaseDriver.GetById(id);
-				logger.Debug(string.Format(Messages.GetByIdReceived, id));
+				var article = _databaseDriver.GetById(id);
+				_logger.Debug(string.Format(Messages.GetByIdReceived, id));
 				return ServiceMethodResult<Article>.Ok(article);
 			}
 			catch (Exception e)
 			{
 				var message = string.Format(Messages.GetByIdException, id);
-				logger.Error(message, e);
+				_logger.Error(message, e);
 				return ServiceMethodResult<Article>.Error(message);
 			}
 		}
