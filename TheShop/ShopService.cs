@@ -25,7 +25,7 @@ namespace TheShop
 			if (article == null)
 			{
 				logger.Debug(Messages.SellArticleArticleNull);
-				return new ServiceMethodResult<bool>(false, true, Messages.SellArticleArticleNull);
+				return ServiceMethodResult<bool>.Error(Messages.SellArticleArticleNull);
 			}
 
 			logger.Debug(string.Format(Messages.SellArticleTryingToSell, article.ID));
@@ -38,14 +38,13 @@ namespace TheShop
 			{
 				DatabaseDriver.Save(article);
 				logger.Info(string.Format(Messages.SellArticleSold, article.ID));
-				return new ServiceMethodResult<bool>(true, false);
+				return ServiceMethodResult<bool>.True;
 			}
 			catch (Exception e)
 			{
 				var message = string.Format(Messages.SellArticleException, article.ID);
 				logger.Error(message, e);
-				return new ServiceMethodResult<bool>(
-					false, true, message);
+				return ServiceMethodResult<bool>.Error(message);
 			}
 		}
 
@@ -90,18 +89,18 @@ namespace TheShop
 			{
 				message = string.Format(Messages.OrderArticleSupplierError, id, maxExpectedPrice);
 				logger.Error(message, e);
-				return new ServiceMethodResult<Article>(null, true, message);
+				return ServiceMethodResult<Article>.Error(message);
 			}
 
 			if (article != null)
 			{
 				logger.Debug(string.Format(Messages.OrderArticleReceived, id));
-				return new ServiceMethodResult<Article>(article, false);
+				return ServiceMethodResult<Article>.Ok(article);
 			}
 
 			message = string.Format(Messages.OrderArticleNotFound, id, maxExpectedPrice);
 			logger.Debug(message);
-			return new ServiceMethodResult<Article>(null, true, message);
+			return ServiceMethodResult<Article>.Error(message);
 		}
 
 		public Article GetById(int id)

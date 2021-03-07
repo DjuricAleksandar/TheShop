@@ -3,9 +3,9 @@
 	internal static class Messages
 	{
 		internal const string SellArticleArticleNull = "SellArticle: Article not provided.";
-		internal const string SellArticleTryingToSell = "SellArticle: Trying to sell article with id={0}.";
-		internal const string SellArticleSold = "SellArticle: Article with id={0} is sold.";
-		internal const string SellArticleException = "SellArticle: Could not save article with id={0}.";
+		internal const string SellArticleTryingToSell = "SellArticle: Trying to sell article id={0}.";
+		internal const string SellArticleSold = "SellArticle: Article id={0} is sold.";
+		internal const string SellArticleException = "SellArticle: Could not save article id={0}.";
 
 		internal const string OrderArticleTryingToOrder =
 			"OrderArticle: Trying to order article id={0} with max price={1}.";
