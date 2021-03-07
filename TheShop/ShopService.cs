@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 
 namespace TheShop
@@ -17,31 +16,30 @@ namespace TheShop
 			_suppliers = suppliers;
 		}
 
-		public ServiceMethodResult<bool> SellArticle(Article article, int buyerId)
+		/// <summary>
+		/// Get sold article by Id.
+		/// </summary>
+		/// <param name="id"></param>
+		/// <returns></returns>
+		public ServiceMethodResult<Article> GetById(int id)
 		{
-			if (article == null)
-			{
-				_logger.Debug(Messages.SellArticleArticleNull);
-				return ServiceMethodResult<bool>.Error(Messages.SellArticleArticleNull);
-			}
-
-			_logger.Debug(string.Format(Messages.SellArticleTryingToSell, article.ID));
-
-			article.IsSold = true;
-			article.SoldDate = DateTime.Now;
-			article.BuyerUserId = buyerId;
-
 			try
 			{
-				_databaseDriver.Save(article);
-				_logger.Info(string.Format(Messages.SellArticleSold, article.ID));
-				return ServiceMethodResult<bool>.True;
+				var article = _databaseDriver.GetById(id);
+				if (article == null)
+				{
+					var message = string.Format(Messages.GetByIdNull, id);
+					_logger.Debug(message);
+					return ServiceMethodResult<Article>.Error(message);
+				}
+				_logger.Debug(string.Format(Messages.GetByIdReceived, id));
+				return ServiceMethodResult<Article>.Ok(article);
 			}
 			catch (Exception e)
 			{
-				var message = string.Format(Messages.SellArticleException, article.ID);
+				var message = string.Format(Messages.GetByIdException, id);
 				_logger.Error(message, e);
-				return ServiceMethodResult<bool>.Error(message);
+				return ServiceMethodResult<Article>.Error(message);
 			}
 		}
 
@@ -100,25 +98,31 @@ namespace TheShop
 			return ServiceMethodResult<Article>.Error(message);
 		}
 
-		public ServiceMethodResult<Article> GetById(int id)
+		public ServiceMethodResult<bool> SellArticle(Article article, int buyerId)
 		{
+			if (article == null)
+			{
+				_logger.Debug(Messages.SellArticleArticleNull);
+				return ServiceMethodResult<bool>.Error(Messages.SellArticleArticleNull);
+			}
+
+			_logger.Debug(string.Format(Messages.SellArticleTryingToSell, article.ID));
+
+			article.IsSold = true;
+			article.SoldDate = DateTime.Now;
+			article.BuyerUserId = buyerId;
+
 			try
 			{
-				var article = _databaseDriver.GetById(id);
-				if (article == null)
-				{
-					var message = string.Format(Messages.GetByIdNull, id);
-					_logger.Debug(message);
-					return ServiceMethodResult<Article>.Error(message);
-				}
-				_logger.Debug(string.Format(Messages.GetByIdReceived, id));
-				return ServiceMethodResult<Article>.Ok(article);
+				_databaseDriver.Save(article);
+				_logger.Info(string.Format(Messages.SellArticleSold, article.ID));
+				return ServiceMethodResult<bool>.True;
 			}
 			catch (Exception e)
 			{
-				var message = string.Format(Messages.GetByIdException, id);
+				var message = string.Format(Messages.SellArticleException, article.ID);
 				_logger.Error(message, e);
-				return ServiceMethodResult<Article>.Error(message);
+				return ServiceMethodResult<bool>.Error(message);
 			}
 		}
 	}

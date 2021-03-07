@@ -75,14 +75,16 @@ namespace TheShop.Tests
 
 		[Theory]
 		[InlineData(LowestPrice - 1)]
-		[InlineData(MiddlePrice - 1)]
-		[InlineData(HighestPrice - 1)]
+		[InlineData(LowestPrice)]
+		[InlineData(MiddlePrice)]
+		[InlineData(HighestPrice)]
 		public void OrderArticleExistingIdReturnsArticle(int maxExpectedPrice)
 		{
 			var result = _shop.OrderArticle(1, maxExpectedPrice);
 			Assert.False(result.IsError);
 			Assert.Empty(result.Message);
 			Assert.Equal(1, result.Result.ID);
+			Assert.True(result.Result.ArticlePrice <= maxExpectedPrice);
 		}
 
 		[Fact]
@@ -101,7 +103,7 @@ namespace TheShop.Tests
 			const int maxValue = int.MaxValue;
 			var result = _shop.OrderArticle(ThrowException, maxValue);
 			Assert.True(result.IsError);
-			Assert.Equal(string.Format(Messages.OrderArticleSupplierError, ThrowException, maxValue), result.Message);
+			Assert.Equal(string.Format(Messages.OrderArticleNotFound, ThrowException, maxValue), result.Message);
 		}
 
 		[Fact]
